@@ -22,6 +22,7 @@ from absl import flags
 from nanoemoji import glyphmap
 from nanoemoji import features
 from nanoemoji import util
+from absl import logging
 
 
 FLAGS = flags.FLAGS
@@ -30,6 +31,7 @@ flags.DEFINE_string("output_file", "-", "Output filename ('-' means stdout)")
 
 
 def main(argv):
+    logging.info("argv from fea %s", argv[0])
     with util.file_printer(FLAGS.output_file) as print:
         sequences = sorted(
             {
@@ -38,7 +40,7 @@ def main(argv):
                 if len(gm.codepoints) > 1
             }
         )
-        print(features.generate_fea(sequences))
+        print(features.generate_fea(sequences, feature_file))
 
 
 if __name__ == "__main__":

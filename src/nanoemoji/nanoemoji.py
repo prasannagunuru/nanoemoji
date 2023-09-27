@@ -177,7 +177,7 @@ def write_preamble(nw):
     )
     nw.newline()
 
-    module_rule(nw, "write_fea", "--output_file $out $in")
+    module_rule(nw, "write_fea", "--output_file $out --feature_file=$feature_file $in")
     nw.newline()
 
     # set height only, let width scale proportionally
@@ -433,11 +433,12 @@ def write_compressed_bitmap_builds(
         nw.build(dest, rule_name, infile_fn(svg_file), variables=variables)
 
 
-def write_fea_build(nw: NinjaWriter, font_config: FontConfig):
+def write_fea_build(nw: NinjaWriter, font_config: FontConfig, feature_file: Path = None):
     nw.build(
         rel_build(_fea_file(font_config)),
         "write_fea",
         rel_build(_glyphmap_file(font_config, font_config.default())),
+        None if feature_file is None else rel_build(feature_file),
     )
     nw.newline()
 
@@ -652,9 +653,14 @@ def _run(argv):
                 write_glyphmap_rule(nw, glyphmap_generator)
 
             # After rules, builds
-
+            feature_file = None
+            for f in argv:
+                if f.endswith(".fea"):
+                    feature_file = f
+                    break
+                
             for font_config in font_configs:
-                write_fea_build(nw, font_config)
+                write_fea_build(nw, font_config, feature_file)
 
             for font_config in font_configs:
                 for master in font_config.masters:
